@@ -16,10 +16,10 @@ public class CurrencyRedisRepository {
     private RedisTemplate template;
 
     public CurrencyLayerModel save(CurrencyLayerModel model) {
-        template.opsForHash().put("currency","1",model);
+        template.opsForHash().put("currency","currency_key",model);
         return model;
     }
     public CurrencyLayerModel get() {
-        return (CurrencyLayerModel) template.opsForHash().get("currency","1");
+        return (CurrencyLayerModel) template.opsForHash().get("currency","currency_key");
     }
 }
