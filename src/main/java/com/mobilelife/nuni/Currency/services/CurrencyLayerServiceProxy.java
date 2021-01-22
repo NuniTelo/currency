@@ -26,22 +26,22 @@ public class CurrencyLayerServiceProxy {
     @Async
     public CompletableFuture<Map<String,Double>> getLiveExchangeRates() {
         try {
-            CurrencyLayerModel results = currencyRedisRepository.get();
-            if (results != null) {
-                return CompletableFuture.completedFuture(results.getQuotes());
-            } else {
-                CurrencyLayerModel live = new RestTemplate().getForObject(BASE_URL + "/live?access_key=" + API_KEY, CurrencyLayerModel.class);
-                return CompletableFuture.supplyAsync(() -> {
-                    if (live.getSuccess()) {
-                        currencyRedisRepository.save(live);
-                        return live.getQuotes();
-                    } else {
-                        return new HashMap<>();
+                return CompletableFuture.supplyAsync(()->{
+                    CurrencyLayerModel results = currencyRedisRepository.get();
+                    if(results!=null){
+                        return results.getQuotes();
+                    }else {
+                        CurrencyLayerModel live = new RestTemplate().getForObject(BASE_URL + "/live?access_key=" + API_KEY, CurrencyLayerModel.class);
+                        if (live.getSuccess()) {
+                            currencyRedisRepository.save(live);
+                            return live.getQuotes();
+                        } else {
+                            return new HashMap<>();
+                        }
                     }
                 });
-            }
         }catch (Exception e){
-            return CompletableFuture.completedFuture(new HashMap<>());
+            return CompletableFuture.supplyAsync(()-> new HashMap<>());
         }
     }
 }
